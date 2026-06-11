@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Healthy Blood · Quiz Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=SF+Pro+Display&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --ink: #1d1d1f;
+    --ink-2: #424246;
+    --ink-3: #6e6e73;
+    --ink-4: #a1a1a6;
+    --line: #e5e5ea;
+    --line-2: #f0f0f3;
+    --accent: #0a84ff;
+    --accent-2: #007aff;
+    --green: #34c759;
+    --red: #ff3b30;
+    --amber: #ff9500;
+    --purple: #af52de;
+    --pink: #ff2d55;
+    --cyan: #5ac8fa;
+    --blue: #3b82f6;
+    --navy: #0d2137;
+    /* branch colors */
+    --b-sleep: #3b82f6;
+    --b-pain: #ef4444;
+    --b-inflammation: #f59e0b;
+    --b-tinnitus: #a855f7;
+    --b-menopause: #ec4899;
+    --b-recovery: #22c55e;
+    --b-nerve: #06b6d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.005em;
+  }
+  .wrap { max-width: 1340px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* HEADER */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(245,245,247,0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 24px;
+    margin-bottom: 28px;
+  }
+  .topbar-inner { max-width: 1340px; margin: 0 auto; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .logo {
+    font-family: 'SF Pro Display', 'Inter', sans-serif;
+    font-size: 18px; font-weight: 700; color: var(--ink);
+    letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(52,199,89,.6); animation: livePulse 1.8s infinite; }
+  @keyframes livePulse { 0% { box-shadow: 0 0 0 0 rgba(52,199,89,.55); } 70% { box-shadow: 0 0 0 8px rgba(52,199,89,0); } 100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); } }
+  .logo-sub { font-size: 12px; font-weight: 500; color: var(--ink-3); letter-spacing: 0; }
+  .range-pills { display: flex; gap: 4px; padding: 4px; background: var(--card); border-radius: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+  .range-pill { background: transparent; border: none; padding: 6px 12px; font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-3); border-radius: 8px; cursor: pointer; transition: all .15s ease; }
+  .range-pill:hover { color: var(--ink); }
+  .range-pill.active { background: var(--ink); color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .right-cluster { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .btn { background: var(--ink); color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: opacity .15s ease; }
+  .btn:hover { opacity: 0.85; }
+  .btn-secondary { background: var(--card); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+  .btn-secondary:hover { background: var(--line-2); opacity: 1; }
+  .live-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--ink-3);
+    background: var(--card); border-radius: 999px; padding: 5px 12px;
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .live-tag b { color: var(--ink); }
+  .live-tag .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: livePulse 1.8s infinite; }
+
+  /* GRID + CARDS */
+  .grid { display: grid; gap: 18px; }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 0 0 1px var(--line);
+    transition: box-shadow .2s ease;
+  }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
+  .card-title-large { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; text-transform: none; }
+
+  /* STAT CARDS */
+  .stat-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.04), 0 0 0 1px var(--line); }
+  .stat-label { font-size: 12px; color: var(--ink-3); font-weight: 500; letter-spacing: 0; margin-bottom: 4px; }
+  .stat-value { font-family: 'SF Pro Display', Inter, sans-serif; font-size: 38px; font-weight: 700; color: var(--ink); line-height: 1; letter-spacing: -0.025em; }
+  .stat-meta { font-size: 11.5px; color: var(--ink-3); margin-top: 8px; font-weight: 500; }
+  .stat-meta.up { color: var(--green); }
+  .stat-meta.down { color: var(--red); }
+  .stat-live .stat-value { color: var(--green); }
+  .stat-conv .stat-value { color: var(--accent-2); }
+
+  /* SECTION HEADER */
+  .section-header { display: flex; justify-content: space-between; align-items: baseline; margin: 30px 0 12px; }
+  .section-header h2 { font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+  .section-header .meta { font-size: 12px; color: var(--ink-3); }
+
+  /* FUNNEL */
+  .funnel { display: flex; flex-direction: column; gap: 8px; }
+  .funnel-row {
+    display: grid; grid-template-columns: 220px 1fr 64px 70px;
+    align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: 12px;
+    background: var(--bg);
+    transition: background .15s ease;
+  }
+  .funnel-row:hover { background: var(--line-2); }
+  .funnel-row.branch-split { background: linear-gradient(90deg, var(--bg) 0%, #fafafd 100%); border: 1px dashed var(--line); }
+  /* Faint green border highlights the step a live visitor is currently on (real-time). */
+  .funnel-row.live-here { border: 1px solid rgba(52,199,89,.55); background: rgba(52,199,89,.06); box-shadow: 0 0 0 3px rgba(52,199,89,.10); transition: border-color .35s ease, background .35s ease, box-shadow .35s ease; }
+  .funnel-row.live-here .funnel-label::after { content: "● live"; margin-left: 8px; font-size: 10.5px; letter-spacing: .04em; color: #1e8449; font-weight: 700; vertical-align: middle; }
+  .funnel-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .funnel-sub { font-size: 11px; color: var(--ink-4); font-weight: 500; margin-top: 2px; }
+  .funnel-bar { background: var(--line-2); height: 14px; border-radius: 999px; overflow: hidden; position: relative; }
+  .funnel-bar-fill { height: 100%; background: var(--ink); border-radius: 999px; transition: width .45s cubic-bezier(.22,1,.36,1); display: flex; align-items: center; padding-left: 8px; }
+  .funnel-count { font-size: 18px; font-weight: 700; color: var(--ink); text-align: right; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+  .funnel-drop { font-size: 11.5px; font-weight: 600; color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+  .funnel-drop.warn { color: var(--amber); }
+  .funnel-drop.alert { color: var(--red); }
+
+  /* BRANCH SPLIT VIEW */
+  .branch-fan { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin: 6px 0 4px; }
+  .branch-tile {
+    border-radius: 10px; padding: 12px 10px; background: var(--card);
+    box-shadow: inset 0 0 0 1px var(--line);
+    text-align: center;
+    border-top: 3px solid var(--ink-4);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .branch-tile:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1px var(--line), 0 4px 12px rgba(0,0,0,.06); }
+  .branch-tile.active { box-shadow: inset 0 0 0 2px var(--ink); }
+  .branch-tile-name { font-size: 11px; font-weight: 700; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.04em; }
+  .branch-tile-count { font-family: 'SF Pro Display', Inter, sans-serif; font-size: 22px; font-weight: 700; color: var(--ink); margin-top: 4px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .branch-tile-pct { font-size: 11px; color: var(--ink-3); margin-top: 2px; font-weight: 500; }
+
+  /* DONUT */
+  .donut-wrap { display: flex; gap: 22px; align-items: center; }
+  .donut { width: 156px; height: 156px; border-radius: 50%; position: relative; flex-shrink: 0; }
+  .donut::before { content: ''; position: absolute; inset: 22px; background: var(--card); border-radius: 50%; }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1; }
+  .donut-center .n { font-family: 'SF Pro Display', Inter, sans-serif; font-size: 28px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .donut-center .l { font-size: 10px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 7px; }
+  .donut-legend-item { display: grid; grid-template-columns: 14px 1fr auto auto; align-items: center; gap: 10px; font-size: 12.5px; }
+  .donut-legend-item .sw { width: 12px; height: 12px; border-radius: 4px; }
+  .donut-legend-item .nm { color: var(--ink-2); font-weight: 500; text-transform: capitalize; }
+  .donut-legend-item .ct { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .donut-legend-item .pc { font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; min-width: 36px; text-align: right; }
+
+  /* LIST ROWS */
+  .row-list { display: flex; flex-direction: column; gap: 2px; }
+  .data-row {
+    display: grid; grid-template-columns: 1fr auto;
+    padding: 9px 12px; border-radius: 8px; align-items: center;
+    transition: background .15s ease;
+  }
+  .data-row:hover { background: var(--line-2); }
+  .data-row .lbl { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .data-row .val { font-size: 13px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .data-row .bar-mini { height: 4px; background: var(--ink); border-radius: 2px; margin-top: 3px; opacity: 0.7; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { text-align: left; padding: 10px 12px; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 600; border-bottom: 1px solid var(--line); }
+  td { padding: 11px 12px; border-bottom: 1px solid var(--line-2); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--line-2); }
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em; }
+  .pill-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .pill-screen { background: var(--line-2); color: var(--ink-2); }
+
+  /* BOTTLENECKS */
+  .bottleneck {
+    border-radius: 12px; padding: 14px 16px; background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+    box-shadow: inset 0 0 0 1px #fbbf24;
+    display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+    margin-bottom: 8px;
+  }
+  .bottleneck.critical { background: linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%); box-shadow: inset 0 0 0 1px #ef4444; }
+  .bottleneck-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--amber); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .bottleneck.critical .bottleneck-icon { background: var(--red); }
+  .bottleneck-text { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+  .bottleneck-text b { color: var(--ink); }
+  .bottleneck-pct { font-family: 'SF Pro Display', Inter, sans-serif; font-size: 26px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .empty-state { padding: 28px; text-align: center; color: var(--ink-3); font-size: 13px; }
+
+  /* ACCORDION (per-question answers) */
+  .accordion-item { border-bottom: 1px solid var(--line-2); }
+  .accordion-item:last-child { border-bottom: none; }
+  .accordion-trigger { width: 100%; background: transparent; border: none; padding: 12px 0; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--ink); text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .accordion-trigger:hover { color: var(--accent-2); }
+  .accordion-trigger .chev { color: var(--ink-3); transition: transform .25s ease; }
+  .accordion-trigger.open .chev { transform: rotate(180deg); }
+  .accordion-body { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+  .accordion-body.open { max-height: 800px; }
+  .accordion-inner { padding: 4px 0 14px; }
+  .answer-row { display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center; padding: 6px 0; }
+  .answer-row .lbl { font-size: 12.5px; color: var(--ink-2); }
+  .answer-row .bar { height: 6px; background: var(--line-2); border-radius: 3px; overflow: hidden; position: relative; min-width: 90px; }
+  .answer-row .bar-fill { height: 100%; background: var(--accent-2); border-radius: 3px; }
+  .answer-row .ct { font-size: 12px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; min-width: 32px; text-align: right; }
+
+  /* LIVE VISITORS */
+  .live-table { width: 100%; }
+  .live-row {
+    display: grid; grid-template-columns: 100px 1fr 200px 1fr 90px;
+    padding: 10px 14px; border-radius: 10px; align-items: center; gap: 10px;
+    font-size: 12.5px;
+    background: var(--bg); margin-bottom: 4px;
+  }
+  .live-id { font-family: 'SF Mono', 'Monaco', monospace; color: var(--ink-3); font-size: 11px; }
+  .live-loc { color: var(--ink-2); font-weight: 500; }
+  .live-pill { display: inline-flex; align-items: center; gap: 5px; }
+  .live-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .live-pill-text { font-size: 11.5px; font-weight: 600; color: var(--ink-2); text-transform: capitalize; }
+  .live-screen { font-size: 11.5px; color: var(--ink-3); }
+  .live-time { font-size: 11px; color: var(--ink-4); text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* FOOTER UPDATED-AT */
+  .footer-meta { text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--ink-4); }
+
+  .loading { opacity: 0.5; pointer-events: none; }
+
+  /* RECENT ACTIVITY (collapsible at top) */
+  .recent-collapsible { overflow: hidden; }
+  .recent-toggle { width: 100%; background: transparent; border: none; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-family: inherit; color: inherit; transition: background .15s ease; }
+  .recent-toggle:hover { background: var(--line-2); }
+  .recent-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: livePulse 1.8s infinite; }
+  .recent-chev { font-size: 16px; color: var(--ink-3); transition: transform .3s ease; }
+  .recent-collapsible.open .recent-chev { transform: rotate(180deg); }
+  .recent-body { max-height: 0; overflow: hidden; transition: max-height .35s cubic-bezier(.22,1,.36,1); }
+  .recent-collapsible.open .recent-body { max-height: 1400px; overflow-y: auto; }
+
+  /* Sessions table — clickable rows */
+  #sessionsTable tr { cursor: pointer; }
+  #sessionsTable tr:hover td { background: var(--line-2); }
+
+  /* BRANCH PERFORMANCE */
+  .branch-perf-row { display: grid; grid-template-columns: 110px 1fr 90px 56px; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line-2); }
+  .branch-perf-row:last-child { border-bottom: none; }
+  .branch-perf-name { font-size: 12.5px; font-weight: 600; color: var(--ink-2); text-transform: capitalize; }
+  .branch-perf-name .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .branch-perf-bar { height: 8px; background: var(--line-2); border-radius: 4px; overflow: hidden; }
+  .branch-perf-fill { height: 100%; border-radius: 4px; transition: width .45s cubic-bezier(.22,1,.36,1); }
+  .branch-perf-counts { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; text-align: right; }
+  .branch-perf-pct { font-size: 14px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+
+  /* HOURLY CHART */
+  .hourly-bars { display: flex; gap: 2px; align-items: flex-end; height: 90px; padding: 4px 0; }
+  .hourly-bar { flex: 1; background: var(--line); border-radius: 2px 2px 0 0; min-height: 2px; position: relative; transition: background .15s ease; }
+  .hourly-bar.has-data { background: var(--accent-2); }
+  .hourly-bar.has-completion { background: linear-gradient(to top, var(--green) 0%, var(--green) var(--comp-pct, 0%), var(--accent-2) var(--comp-pct, 0%), var(--accent-2) 100%); }
+  .hourly-bar:hover::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 10.5px; padding: 4px 8px; border-radius: 6px; white-space: nowrap; margin-bottom: 4px; z-index: 10; }
+  .hourly-axis { display: flex; justify-content: space-between; margin-top: 6px; font-size: 10px; color: var(--ink-4); font-weight: 500; }
+
+  /* DEVICE SPLIT */
+  .device-row { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 7px 0; font-size: 12.5px; }
+  .device-row .lbl { color: var(--ink-2); font-weight: 500; }
+  .device-row .val { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .device-row .pct { display: inline-block; font-size: 10.5px; color: var(--ink-3); margin-left: 6px; font-weight: 500; }
+
+  /* SESSION DETAIL MODAL */
+  .session-modal-overlay { position: fixed; inset: 0; background: rgba(15, 15, 20, 0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; }
+  .session-modal-overlay.show { display: flex; }
+  .session-modal { background: var(--card); border-radius: 18px; max-width: 680px; width: 100%; max-height: 86vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+  .session-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--card); border-radius: 18px 18px 0 0; }
+  .session-modal-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .session-modal-close { background: var(--line-2); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; color: var(--ink-3); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .session-modal-close:hover { background: var(--line); color: var(--ink); }
+  .session-modal-body { padding: 18px 22px 24px; }
+  .session-meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 24px; margin-bottom: 18px; }
+  .session-meta-item .l { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+  .session-meta-item .v { font-size: 13px; color: var(--ink); font-weight: 600; margin-top: 2px; }
+  .timeline { border-left: 2px solid var(--line); padding-left: 16px; margin-left: 4px; }
+  .timeline-event { position: relative; padding: 6px 0 6px 4px; font-size: 12.5px; color: var(--ink-2); }
+  .timeline-event::before { content: ''; position: absolute; left: -22px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+  .timeline-event.screen::before { background: var(--accent-2); }
+  .timeline-event.answer::before { background: var(--green); }
+  .timeline-event.complete::before { background: var(--green); width: 12px; height: 12px; left: -24px; top: 10px; box-shadow: 0 0 0 4px rgba(52,199,89,.18); }
+  .timeline-event .when { font-size: 10.5px; color: var(--ink-4); margin-right: 8px; font-variant-numeric: tabular-nums; }
+  .timeline-event .what { font-weight: 600; color: var(--ink); }
+  .timeline-event .detail { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+
+  /* SECTION HEADER OFFSET tweak so deeper insights row doesn't collide with stat cards */
+  .grid + .recent-collapsible { margin-top: 18px; }
+  .skeleton { background: linear-gradient(90deg, var(--line-2) 0%, var(--line) 50%, var(--line-2) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; border-radius: 8px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  @media (max-width: 1100px) {
+    .grid-deeper { grid-template-columns: 1fr !important; }
+    .grid-funnel { grid-template-columns: 1fr !important; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .branch-fan { grid-template-columns: repeat(4, 1fr); }
+    .funnel-row { grid-template-columns: 1fr 1fr 50px 60px; }
+    .funnel-label { font-size: 12px; }
+    .live-row { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  }
+  @media (max-width: 640px) {
+    .branch-fan { grid-template-columns: repeat(2, 1fr); }
+    .wrap { padding: 0 12px 60px; }
+    .topbar { padding: 10px 12px; margin-bottom: 18px; }
+    .topbar-inner { gap: 10px; }
+    .logo { font-size: 15px; gap: 6px; }
+    .logo-sub { font-size: 10px; }
+    .right-cluster { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .btn { padding: 7px 10px; font-size: 11.5px; }
+    .live-tag { padding: 4px 9px; font-size: 11px; }
+    .live-tag .pulse { width: 6px; height: 6px; }
+
+    /* Range pills — let them scroll horizontally without breaking layout */
+    .range-pills { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; max-width: 100%; padding: 3px; }
+    .range-pills::-webkit-scrollbar { display: none; }
+    .range-pill { flex-shrink: 0; padding: 6px 10px; font-size: 11.5px; }
+
+    /* Top stats */
+    .stat-value { font-size: 28px; }
+    .stat-card { padding: 16px; border-radius: 14px; }
+    .stat-label { font-size: 11px; }
+
+    /* Section headers */
+    .section-header { margin: 22px 0 10px; flex-wrap: wrap; gap: 4px; }
+    .section-header h2 { font-size: 17px; }
+    .section-header .meta { font-size: 11px; }
+
+    /* Cards */
+    .card { padding: 16px; border-radius: 14px; }
+    .card-title-large { font-size: 14px; }
+
+    /* Recent Activity collapsible */
+    .recent-toggle { padding: 14px 16px; }
+    .recent-toggle .card-title-large { font-size: 13.5px; }
+    .recent-collapsible.open .recent-body { max-height: 80vh; }
+
+    /* Tables — horizontal scroll on mobile */
+    table { font-size: 11.5px; min-width: 640px; }
+    th { padding: 8px; font-size: 9.5px; }
+    td { padding: 9px 8px; }
+    .recent-body > div { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Funnel rows — restack so label gets full width, bar + count go below */
+    .funnel-row { grid-template-columns: 1fr auto auto; grid-template-rows: auto auto; gap: 6px 8px; padding: 10px 12px; }
+    .funnel-row > div:first-child { grid-column: 1 / -1; }
+    .funnel-label { font-size: 12.5px; }
+    .funnel-sub { font-size: 10.5px; }
+    .funnel-bar { grid-column: 1; }
+    .funnel-count { font-size: 14px; grid-column: 2; }
+    .funnel-drop { font-size: 10.5px; grid-column: 3; }
+
+    /* Branch fan tiles */
+    .branch-tile { padding: 10px 8px; border-radius: 9px; }
+    .branch-tile-name { font-size: 9.5px; }
+    .branch-tile-count { font-size: 18px; }
+    .branch-tile-pct { font-size: 10px; }
+
+    /* Donut */
+    .donut { width: 130px; height: 130px; margin: 0 auto; }
+    .donut-center .n { font-size: 22px; }
+
+    /* Live visitors — restack as cards */
+    .live-row { grid-template-columns: 1fr 1fr; gap: 4px 8px; padding: 10px 12px; font-size: 11.5px; }
+    .live-row .live-id { grid-column: 1 / -1; font-size: 10px; }
+    .live-time { text-align: right; }
+
+    /* Branch performance row */
+    .branch-perf-row { grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 4px 10px; }
+    .branch-perf-bar { grid-column: 1 / -1; grid-row: 2; }
+    .branch-perf-name { font-size: 12px; }
+    .branch-perf-counts { font-size: 10.5px; }
+    .branch-perf-pct { font-size: 13px; }
+
+    /* Bottleneck cards */
+    .bottleneck { grid-template-columns: auto 1fr; gap: 10px; padding: 12px; }
+    .bottleneck-pct { grid-column: 1 / -1; text-align: right; font-size: 22px; }
+    .bottleneck-text { font-size: 12px; }
+
+    /* Session detail modal — go nearly full-screen */
+    .session-modal-overlay { padding: 0; align-items: stretch; }
+    .session-modal { max-height: 100vh; max-width: 100%; border-radius: 0; }
+    .session-modal-header { padding: 14px 16px; border-radius: 0; }
+    .session-modal-title { font-size: 13.5px; }
+    .session-modal-body { padding: 14px 16px 32px; }
+    .session-meta-grid { grid-template-columns: 1fr; gap: 10px; }
+    .session-meta-item .v { font-size: 12.5px; }
+    .timeline { padding-left: 14px; }
+    .timeline-event { font-size: 12px; }
+
+    /* Hourly chart smaller bars */
+    .hourly-bars { height: 70px; }
+    .hourly-bar:hover::after { font-size: 9.5px; }
+
+    /* Donut wrap stacks */
+    .donut-wrap { flex-direction: column; align-items: center; gap: 16px; }
+    .donut-legend { width: 100%; }
+
+    /* Page header / footer meta */
+    .footer-meta { font-size: 10.5px; padding-top: 16px; margin-top: 24px; }
+  }
+  @media (max-width: 380px) {
+    .branch-fan { grid-template-columns: 1fr 1fr; }
+    .branch-tile-count { font-size: 16px; }
+    .stat-value { font-size: 24px; }
+    .donut { width: 110px; height: 110px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">
+      <span class="dot"></span>
+      Healthy Blood
+      <span class="logo-sub">· Cholesterol Quiz · tryhealthyblood.com · All regions</span>
+    </div>
+    <div class="range-pills" id="rangePills">
+      <button class="range-pill" data-range="1h">1H</button>
+      <button class="range-pill" data-range="2h">2H</button>
+      <button class="range-pill" data-range="6h">6H</button>
+      <button class="range-pill" data-range="12h">12H</button>
+      <button class="range-pill active" data-range="24h">24H</button>
+      <button class="range-pill" data-range="7d">7D</button>
+      <button class="range-pill" data-range="30d">30D</button>
+      <button class="range-pill" data-range="all">All</button>
+    </div>
+    <div class="right-cluster">
+      <span class="live-tag"><span class="pulse"></span> Live <b id="liveCount">—</b></span>
+      <button class="btn btn-secondary" id="btnRefresh">Refresh</button>
+      <button class="btn" id="btnDownload">Download CSV</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="main">
+
+  <!-- TOP STATS -->
+  <div class="grid grid-4">
+    <div class="stat-card stat-live">
+      <div class="stat-label">Live Visitors</div>
+      <div class="stat-value" id="statLive">—</div>
+      <div class="stat-meta">Active in last 30 seconds</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Quizzes Started</div>
+      <div class="stat-value" id="statStarted">—</div>
+      <div class="stat-meta" id="statStartedMeta">In selected range</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value" id="statCompleted">—</div>
+      <div class="stat-meta" id="statCompletedMeta">Reached results</div>
+    </div>
+    <div class="stat-card stat-conv">
+      <div class="stat-label">Conversion Rate</div>
+      <div class="stat-value" id="statConv">—</div>
+      <div class="stat-meta" id="statConvMeta">Started → Results</div>
+    </div>
+  </div>
+
+  <!-- RECENT ACTIVITY — COLLAPSIBLE, TOP OF PAGE -->
+  <div class="recent-collapsible card" style="margin-top: 22px; padding: 0;">
+    <button class="recent-toggle" id="recentToggle" onclick="toggleRecent()">
+      <span style="display:flex;align-items:center;gap:10px;">
+        <span class="recent-pulse"></span>
+        <span class="card-title-large" style="font-size:15px;">Recent Activity</span>
+        <span id="recentBadge" style="font-size:11.5px;color:var(--ink-3);font-weight:500;">— sessions tracked</span>
+      </span>
+      <span class="recent-chev" id="recentChev">▾</span>
+    </button>
+    <div class="recent-body" id="recentBody">
+      <div style="padding: 4px 22px 18px;">
+        <div style="font-size:12px;color:var(--ink-3);margin-bottom:10px;">Click any row to see that visitor's full journey through the quiz.</div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Started</th><th>Session</th><th>Branch</th><th>Reached</th><th>Status</th><th>Time on Quiz</th><th>From</th><th>Device</th><th>Referrer</th>
+              </tr>
+            </thead>
+            <tbody id="sessionsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEEPER INSIGHTS ROW: Branch Performance · Hourly · Device -->
+  <div class="section-header">
+    <h2>Deeper Insights</h2>
+    <span class="meta">Branch performance, traffic timing, and device split</span>
+  </div>
+  <div class="grid grid-3 grid-deeper" style="grid-template-columns: 1.4fr 1fr 0.7fr;">
+    <!-- Branch Performance -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Branch Completion Rates</div>
+        <span class="card-title">Of those who started each path</span>
+      </div>
+      <div id="branchPerformance"></div>
+    </div>
+    <!-- Hourly Traffic -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Last 24h Traffic</div>
+        <span class="card-title" id="hourlyTotal">— starts</span>
+      </div>
+      <div id="hourlyChart" style="margin-top: 8px;"></div>
+    </div>
+    <!-- Device Split -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Devices</div>
+      </div>
+      <div id="deviceSplit"></div>
+    </div>
+  </div>
+
+  <!-- FUNNEL + BRANCH DONUT -->
+  <div class="section-header">
+    <h2>Funnel Tree</h2>
+    <span class="meta" id="funnelMeta">Click a branch tile to filter</span>
+  </div>
+  <div class="grid grid-3 grid-funnel" style="grid-template-columns: 2fr 1fr;">
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Step-by-step Drop-off</div>
+        <span class="card-title" id="funnelTotal">— sessions</span>
+      </div>
+      <div class="funnel" id="funnel"></div>
+      <div class="section-header" style="margin: 18px 0 8px;">
+        <h2 style="font-size: 14px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em;">Branch Split — Q1 Primary Concern</h2>
+      </div>
+      <div class="branch-fan" id="branchFan"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Path Distribution</div>
+      </div>
+      <div class="donut-wrap">
+        <div class="donut" id="donut" style="background: var(--line-2);">
+          <div class="donut-center"><div class="n" id="donutTotal">—</div><div class="l">Started</div></div>
+        </div>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTLENECKS -->
+  <div class="section-header">
+    <h2>Bottleneck Detector</h2>
+    <span class="meta">Auto-flagged questions with &gt;20% drop-off</span>
+  </div>
+  <div class="card">
+    <div id="bottlenecks"></div>
+  </div>
+
+  <!-- CTA ENGAGEMENT (click-through vs close) -->
+  <div class="section-header">
+    <h2>CTA Engagement</h2>
+    <span class="meta">Did they click "Get Healthy Blood Now" or dismiss?</span>
+  </div>
+  <div class="grid grid-3" style="grid-template-columns: 1.4fr 1fr 0.8fr;">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Click vs Close · by branch</div>
+        <span class="card-title" id="ctaTotals">— clicks · — closes</span>
+      </div>
+      <div id="ctaByBranch"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">Which CTA Got Clicked</div>
+      </div>
+      <div id="ctaByCta"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title-large">How They Dismissed</div>
+      </div>
+      <div id="ctaCloseMethod"></div>
+    </div>
+  </div>
+
+  <!-- LIVE VISITORS -->
+  <div class="section-header">
+    <h2>Live Visitors</h2>
+    <span class="meta" id="liveMeta">Refreshes every 5 seconds</span>
+  </div>
+  <div class="card">
+    <div id="liveVisitors"></div>
+  </div>
+
+  <!-- TWO COLUMNS: GEO + REFERRERS -->
+  <div class="section-header">
+    <h2>Source &amp; Geography</h2>
+  </div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title-large">Top Cities</div><span class="card-title" id="cityCount">—</span></div>
+      <div class="row-list" id="cities"></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title-large">Referrers</div><span class="card-title" id="refCount">—</span></div>
+      <div class="row-list" id="referrers"></div>
+    </div>
+  </div>
+
+  <!-- PER-QUESTION ANSWER DISTRIBUTION -->
+  <div class="section-header">
+    <h2>Per-question Answer Distribution</h2>
+    <span class="meta">Click to expand each question</span>
+  </div>
+  <div class="card">
+    <div id="answers"></div>
+  </div>
+
+  <div class="footer-meta" id="footerMeta">Loading…</div>
+</div>
+
+<!-- SESSION DETAIL MODAL -->
+<div class="session-modal-overlay" id="sessionModal" onclick="if(event.target===this) closeSessionDetail()">
+  <div class="session-modal">
+    <div class="session-modal-header">
+      <div class="session-modal-title" id="sessionModalTitle">Session detail</div>
+      <button class="session-modal-close" onclick="closeSessionDetail()" aria-label="Close">×</button>
+    </div>
+    <div class="session-modal-body" id="sessionModalBody">Loading…</div>
+  </div>
+</div>
+
+<script>
+const STATS_URL = '/.netlify/functions/stats';
+const DOWNLOAD_URL = '/.netlify/functions/download';
+// Restore last selected range from localStorage (default 24h)
+let currentRange = (function() {
+  try {
+    var saved = localStorage.getItem('hb_range');
+    var valid = ['1h','2h','6h','12h','24h','7d','30d','all'];
+    if (saved && valid.indexOf(saved) >= 0) return saved;
+  } catch(e) {}
+  return '24h';
+})();
+let pollTimer = null;
+let currentData = null;
+
+function fmt(n) { return n == null ? '—' : Number(n).toLocaleString(); }
+function pct(n) { return n == null ? '—' : (Math.round(n * 10) / 10) + '%'; }
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
+}
+function clockTime(ts) {
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function secsToHuman(s) {
+  if (!s) return '—';
+  if (s < 60) return s + 's';
+  const m = Math.floor(s / 60), r = s % 60;
+  return m + 'm ' + r + 's';
+}
+
+const BRANCH_LABEL = {
+  statin: 'On a Statin', supplements: 'Supplements', both: 'Statin + Supplements', nothing: 'Nothing Yet'
+};
+// Branch order used by the fan / performance / CTA panels.
+const BRANCHES = ['statin','supplements','both','nothing'];
+
+async function fetchStats(range) {
+  const r = await fetch(STATS_URL + '?range=' + range);
+  if (!r.ok) throw new Error('stats fetch failed: ' + r.status);
+  return r.json();
+}
+
+function render(d) {
+  currentData = d;
+  const colors = d.branch_colors || {};
+
+  // STAT CARDS
+  document.getElementById('liveCount').textContent = fmt(d.totals.live);
+  document.getElementById('statLive').textContent = fmt(d.totals.live);
+  document.getElementById('statStarted').textContent = fmt(d.totals.started);
+  document.getElementById('statCompleted').textContent = fmt(d.totals.completed);
+  document.getElementById('statConv').textContent = pct(d.totals.conversion_pct);
+  document.getElementById('statCompletedMeta').textContent = d.totals.avg_completion_seconds ? 'Avg ' + secsToHuman(d.totals.avg_completion_seconds) + ' to finish' : 'Reached results';
+
+  // FUNNEL
+  const total = d.totals.started || 1;
+  document.getElementById('funnelTotal').textContent = fmt(d.totals.started) + ' sessions';
+  const funnelEl = document.getElementById('funnel');
+  funnelEl.innerHTML = '';
+  const liveScreens = d.live_active_screens || {};
+  for (let i = 1; i <= 10; i++) {
+    if (i === 2) continue;   // branch split row (Q1 · Current Protocol) inserted below
+    const ct = d.funnel[i] || 0;
+    const prev = i > 1 ? (d.funnel[i - 1] || 0) : ct;
+    const drop = prev > 0 ? ((prev - ct) / prev) * 100 : 0;
+    const dropClass = drop > 30 ? 'alert' : (drop > 15 ? 'warn' : '');
+    const w = total > 0 ? Math.max(2, (ct / total) * 100) : 0;
+    const dur = d.durations[i] ? '· ' + d.durations[i] + 's avg' : '';
+    const barColor = (d.question_colors && d.question_colors[i]) ? d.question_colors[i] : 'var(--ink)';
+    const liveClass = (liveScreens[i] || 0) > 0 ? ' live-here' : '';
+    funnelEl.insertAdjacentHTML('beforeend', `
+      <div class="funnel-row${liveClass}">
+        <div>
+          <div class="funnel-label">${d.screen_labels[i] || ('Screen ' + i)}</div>
+          <div class="funnel-sub">Screen ${i} ${dur}</div>
+        </div>
+        <div class="funnel-bar"><div class="funnel-bar-fill" style="width:${w}%;background:${barColor};"></div></div>
+        <div class="funnel-count">${fmt(ct)}</div>
+        <div class="funnel-drop ${dropClass}">${i > 1 ? '−' + (Math.round(drop * 10) / 10) + '%' : ''}</div>
+      </div>
+    `);
+    if (i === 1) {
+      // Insert branch-split row after Gender+Age, at Q1 · Current Protocol
+      const q1 = d.funnel[2] || 0;
+      const q1prev = d.funnel[1] || 1;
+      const q1drop = q1prev > 0 ? ((q1prev - q1) / q1prev) * 100 : 0;
+      const q1Class = q1drop > 30 ? 'alert' : (q1drop > 15 ? 'warn' : '');
+      const q1w = total > 0 ? Math.max(2, (q1 / total) * 100) : 0;
+      const q1Color = (d.question_colors && d.question_colors[2]) ? d.question_colors[2] : 'var(--ink)';
+      const q1Live = (liveScreens[2] || 0) > 0 ? ' live-here' : '';
+      funnelEl.insertAdjacentHTML('beforeend', `
+        <div class="funnel-row branch-split${q1Live}">
+          <div>
+            <div class="funnel-label">${d.screen_labels[2] || 'Q1'}</div>
+            <div class="funnel-sub">Branch split point</div>
+          </div>
+          <div class="funnel-bar"><div class="funnel-bar-fill" style="width:${q1w}%;background:${q1Color};"></div></div>
+          <div class="funnel-count">${fmt(q1)}</div>
+          <div class="funnel-drop ${q1Class}">−${Math.round(q1drop * 10) / 10}%</div>
+        </div>
+      `);
+    }
+  }
+
+  // ===== DEEPER INSIGHTS: Branch Performance · Hourly · Devices =====
+  renderBranchPerformance(d);
+  renderCtaEngagement(d);
+  renderHourly(d);
+  renderDevices(d);
+
+  // BRANCH FAN
+  const branchFan = document.getElementById('branchFan');
+  branchFan.innerHTML = '';
+  BRANCHES.forEach(b => {
+    const ct = d.branches[b] || 0;
+    const p = total > 0 ? ((ct / total) * 100) : 0;
+    branchFan.insertAdjacentHTML('beforeend', `
+      <div class="branch-tile" style="border-top-color:${colors[b] || '#999'};">
+        <div class="branch-tile-name" style="color:${colors[b] || '#999'};">${BRANCH_LABEL[b]}</div>
+        <div class="branch-tile-count">${fmt(ct)}</div>
+        <div class="branch-tile-pct">${Math.round(p * 10) / 10}%</div>
+      </div>
+    `);
+  });
+
+  // DONUT
+  const branches = Object.entries(d.branches).sort((a, b) => b[1] - a[1]);
+  const sumBranches = branches.reduce((s, [, n]) => s + n, 0) || 1;
+  let acc = 0;
+  const stops = branches.map(([b, n]) => {
+    const start = (acc / sumBranches) * 360;
+    acc += n;
+    const end = (acc / sumBranches) * 360;
+    return `${colors[b] || '#999'} ${start}deg ${end}deg`;
+  });
+  const donutEl = document.getElementById('donut');
+  donutEl.style.background = stops.length > 0 ? `conic-gradient(${stops.join(', ')})` : 'var(--line-2)';
+  document.getElementById('donutTotal').textContent = fmt(sumBranches > 0 ? sumBranches : 0);
+
+  const legend = document.getElementById('donutLegend');
+  legend.innerHTML = '';
+  branches.forEach(([b, n]) => {
+    const p = (n / sumBranches) * 100;
+    legend.insertAdjacentHTML('beforeend', `
+      <div class="donut-legend-item">
+        <span class="sw" style="background:${colors[b] || '#999'};"></span>
+        <span class="nm">${BRANCH_LABEL[b] || b}</span>
+        <span class="ct">${fmt(n)}</span>
+        <span class="pc">${Math.round(p * 10) / 10}%</span>
+      </div>
+    `);
+  });
+  if (branches.length === 0) legend.innerHTML = '<div class="empty-state">No branch data yet.</div>';
+
+  // BOTTLENECKS
+  const btEl = document.getElementById('bottlenecks');
+  btEl.innerHTML = '';
+  if (!d.bottlenecks || d.bottlenecks.length === 0) {
+    btEl.innerHTML = '<div class="empty-state">No bottlenecks detected. Funnel is flowing smoothly.</div>';
+  } else {
+    d.bottlenecks.forEach(b => {
+      const cls = b.dropoff_pct > 40 ? 'critical' : '';
+      btEl.insertAdjacentHTML('beforeend', `
+        <div class="bottleneck ${cls}">
+          <div class="bottleneck-icon">!</div>
+          <div class="bottleneck-text">
+            <b>${b.from_label}</b> → <b>${b.to_label}</b><br>
+            ${fmt(b.from_count)} reached this step, only ${fmt(b.to_count)} continued.${b.avg_seconds_on_screen ? ' Avg time on screen: ' + b.avg_seconds_on_screen + 's.' : ''}
+          </div>
+          <div class="bottleneck-pct">−${b.dropoff_pct}%</div>
+        </div>
+      `);
+    });
+  }
+
+  // LIVE VISITORS
+  const liveEl = document.getElementById('liveVisitors');
+  liveEl.innerHTML = '';
+  if (!d.live_visitors || d.live_visitors.length === 0) {
+    liveEl.innerHTML = '<div class="empty-state">No one on the quiz right now.</div>';
+  } else {
+    d.live_visitors.forEach(v => {
+      const c = v.branch ? (colors[v.branch] || '#999') : '#a1a1a6';
+      liveEl.insertAdjacentHTML('beforeend', `
+        <div class="live-row">
+          <div class="live-id">${v.id}</div>
+          <div class="live-loc">${v.city}, ${v.country}</div>
+          <div class="live-pill">
+            <span class="dot" style="background:${c};"></span>
+            <span class="live-pill-text">${v.branch ? BRANCH_LABEL[v.branch] : 'Pre-Q1'}</span>
+          </div>
+          <div class="live-screen">${v.screen_label}</div>
+          <div class="live-time">${timeAgo(v.last_seen)}</div>
+        </div>
+      `);
+    });
+  }
+  document.getElementById('liveMeta').textContent = (d.live_visitors?.length || 0) + ' active · refreshes every 5s';
+
+  // CITIES + REFERRERS
+  function renderRowList(elId, obj, countEl) {
+    const el = document.getElementById(elId);
+    const entries = Object.entries(obj || {}).sort((a, b) => b[1] - a[1]).slice(0, 12);
+    const max = entries.length > 0 ? entries[0][1] : 1;
+    el.innerHTML = '';
+    entries.forEach(([k, v]) => {
+      const w = (v / max) * 100;
+      el.insertAdjacentHTML('beforeend', `
+        <div class="data-row">
+          <div>
+            <div class="lbl">${k}</div>
+            <div class="bar-mini" style="width:${w}%;"></div>
+          </div>
+          <div class="val">${fmt(v)}</div>
+        </div>
+      `);
+    });
+    if (entries.length === 0) el.innerHTML = '<div class="empty-state">No data yet.</div>';
+    if (countEl) document.getElementById(countEl).textContent = entries.length + ' tracked';
+  }
+  renderRowList('cities', d.cities, 'cityCount');
+  renderRowList('referrers', d.referrers, 'refCount');
+
+  // ANSWERS ACCORDION
+  const ansEl = document.getElementById('answers');
+  ansEl.innerHTML = '';
+  const ansOrder = ['gender','age','q1','q2','q3','q4','q5','q6','q7'];
+  const ansLabels = {
+    gender: 'Gender', age: 'Age',
+    q1: 'Q1 · Current Protocol', q2: 'Q2 · Which Statin', q3: 'Q3 · Side Effects',
+    q4: 'Q4 · LDL Number', q5: 'Q5 · Calcium Score', q6: 'Q6 · Biggest Worry',
+    q7: 'Q7 · What Matters Most'
+  };
+  ansOrder.forEach(k => {
+    const distro = d.answers[k];
+    if (!distro) return;
+    const entries = Object.entries(distro).sort((a, b) => b[1] - a[1]);
+    const sum = entries.reduce((s, [, n]) => s + n, 0) || 1;
+    const id = 'acc-' + k;
+    ansEl.insertAdjacentHTML('beforeend', `
+      <div class="accordion-item">
+        <button class="accordion-trigger" onclick="document.getElementById('${id}').classList.toggle('open'); this.classList.toggle('open');">
+          <span>${ansLabels[k]} <span style="color:var(--ink-3);font-weight:500;margin-left:6px;">${entries.length} options · ${fmt(sum)} responses</span></span>
+          <span class="chev">▾</span>
+        </button>
+        <div class="accordion-body" id="${id}"><div class="accordion-inner">
+          ${entries.map(([val, ct]) => {
+            const p = (ct / sum) * 100;
+            return `<div class="answer-row">
+              <div class="lbl">${val}</div>
+              <div class="bar"><div class="bar-fill" style="width:${p}%;"></div></div>
+              <div class="ct">${fmt(ct)} · ${Math.round(p)}%</div>
+            </div>`;
+          }).join('')}
+        </div></div>
+      </div>
+    `);
+  });
+  if (ansEl.innerHTML === '') ansEl.innerHTML = '<div class="empty-state">No answer data yet.</div>';
+
+  // RECENT SESSIONS TABLE
+  const tEl = document.getElementById('sessionsTable');
+  const recentBadge = document.getElementById('recentBadge');
+  if (recentBadge) recentBadge.textContent = fmt(d.totals.started) + ' sessions in range · click to expand';
+  tEl.innerHTML = '';
+  if (!d.recent_sessions || d.recent_sessions.length === 0) {
+    tEl.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--ink-3);padding:24px;">No sessions in this range yet.</td></tr>';
+  } else {
+    d.recent_sessions.forEach(s => {
+      const c = s.branch ? (colors[s.branch] || '#999') : '#a1a1a6';
+      let statusPill;
+      if (s.status === 'completed') {
+        statusPill = '<span class="pill" style="background:#dcfce7;color:#166534;"><span class="pill-dot" style="background:#22c55e;"></span> Completed</span>';
+      } else if (s.status === 'live') {
+        statusPill = '<span class="pill" style="background:#dcfce7;color:#166534;"><span class="pill-dot" style="background:#22c55e;animation:livePulse 1.8s infinite;"></span> Live now</span>';
+      } else {
+        // Left — show where they bailed
+        const leftAt = s.left_at_label ? s.left_at_label.replace(/^Q\d+\s·\s/, '').replace(/^Screen \d+$/, 'Screen ' + s.deepest_screen) : ('Screen ' + s.deepest_screen);
+        statusPill = '<span class="pill" style="background:#fee2e2;color:#991b1b;"><span class="pill-dot" style="background:#dc2626;"></span> Left · ' + leftAt + '</span>';
+      }
+      const dur = (s.duration_seconds && s.duration_seconds > 0) ? secsToHuman(s.duration_seconds) : '—';
+      const fullId = (s.full_id || s.id || '').replace(/'/g, "\\'");
+      tEl.insertAdjacentHTML('beforeend', `
+        <tr onclick="openSessionDetail('${fullId}')">
+          <td>${clockTime(s.started)}<br><span style="font-size:11px;color:var(--ink-4);">${timeAgo(s.started)}</span></td>
+          <td><span class="live-id">${s.id}</span></td>
+          <td>${s.branch ? '<span class="pill" style="background:' + c + '20;color:' + c + ';"><span class="pill-dot" style="background:' + c + ';"></span> ' + BRANCH_LABEL[s.branch] + '</span>' : '<span class="pill pill-screen">Pre-Q1</span>'}</td>
+          <td>${s.deepest_screen} <span style="color:var(--ink-4);font-size:11px;">/ 10</span></td>
+          <td>${statusPill}</td>
+          <td>${dur}</td>
+          <td>${s.city}, ${s.country}</td>
+          <td><span style="font-size:11.5px;color:var(--ink-3);">${s.device || '—'}</span></td>
+          <td><span style="font-size:11.5px;color:var(--ink-3);">${s.referrer}</span></td>
+        </tr>
+      `);
+    });
+  }
+
+  document.getElementById('footerMeta').textContent = 'Last updated ' + new Date(d.generated_at).toLocaleTimeString() + ' · range: ' + d.range + ' · data persists in Netlify Blobs';
+}
+
+// ===== Branch Performance =====
+// ===== CTA Engagement (click-through vs close) =====
+const CTA_LABEL = {
+  'see-results': 'See What I Found',
+  'pdp-atc': 'Get Healthy Blood Now',
+  'sticky-cta': 'Sticky · Get Healthy Blood Now'
+};
+const CLOSE_LABEL = { x: 'Tapped × on the exit popup', no_thanks: '"No thanks, I\'ll come back later"' };
+
+function renderCtaEngagement(d) {
+  const eng = d.cta_engagement || { by_branch: {}, by_cta: {}, by_close_method: {}, totals: { clicks: 0, closes: 0, click_through_pct: 0 } };
+  const tEl = document.getElementById('ctaTotals');
+  if (tEl) tEl.textContent = `${fmt(eng.totals.clicks)} clicks · ${fmt(eng.totals.closes)} closes · ${eng.totals.click_through_pct}% CTR`;
+
+  // by branch
+  const branches = BRANCHES;
+  const colors = d.branch_colors || {};
+  const brEl = document.getElementById('ctaByBranch');
+  if (brEl) {
+    const rows = branches
+      .map(b => ({ b, ...(eng.by_branch[b] || { clicks: 0, closes: 0, click_through_pct: 0 }) }))
+      .filter(r => (r.clicks + r.closes) > 0)
+      .sort((a, b) => b.click_through_pct - a.click_through_pct);
+    if (rows.length === 0) {
+      brEl.innerHTML = '<div class="empty-state">No CTA events yet. Once someone clicks Get Healthy Blood Now or dismisses, it appears here.</div>';
+    } else {
+      brEl.innerHTML = rows.map(r => `
+        <div class="branch-perf-row">
+          <div class="branch-perf-name"><span class="dot" style="background:${colors[r.b] || '#999'};"></span>${BRANCH_LABEL[r.b] || r.b}</div>
+          <div class="branch-perf-bar"><div class="branch-perf-fill" style="width:${Math.min(100, r.click_through_pct)}%;background:${colors[r.b] || '#999'};"></div></div>
+          <div class="branch-perf-counts">${fmt(r.clicks)} clk / ${fmt(r.closes)} close</div>
+          <div class="branch-perf-pct">${r.click_through_pct}%</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // by CTA (which button)
+  const cEl = document.getElementById('ctaByCta');
+  if (cEl) {
+    const entries = Object.entries(eng.by_cta || {}).sort((a, b) => b[1] - a[1]);
+    if (entries.length === 0) cEl.innerHTML = '<div class="empty-state">No clicks yet.</div>';
+    else {
+      const max = Math.max(...entries.map(([, v]) => v), 1);
+      cEl.innerHTML = entries.map(([id, n]) => `
+        <div class="branch-perf-row">
+          <div class="branch-perf-name">${CTA_LABEL[id] || id}</div>
+          <div class="branch-perf-bar"><div class="branch-perf-fill" style="width:${Math.round((n / max) * 100)}%;background:#0d2137;"></div></div>
+          <div class="branch-perf-counts">${fmt(n)}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // by close method
+  const xEl = document.getElementById('ctaCloseMethod');
+  if (xEl) {
+    const m = eng.by_close_method || { x: 0, no_thanks: 0 };
+    const total = (m.x || 0) + (m.no_thanks || 0);
+    if (total === 0) xEl.innerHTML = '<div class="empty-state">No dismissals yet.</div>';
+    else {
+      xEl.innerHTML = ['x','no_thanks'].map(k => {
+        const n = m[k] || 0;
+        const pct = total > 0 ? Math.round((n / total) * 100) : 0;
+        return `
+          <div class="branch-perf-row">
+            <div class="branch-perf-name" style="font-size:12.5px;">${CLOSE_LABEL[k]}</div>
+            <div class="branch-perf-bar"><div class="branch-perf-fill" style="width:${pct}%;background:#dc2626;"></div></div>
+            <div class="branch-perf-counts">${fmt(n)}</div>
+            <div class="branch-perf-pct">${pct}%</div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+}
+
+function renderBranchPerformance(d) {
+  const el = document.getElementById('branchPerformance');
+  if (!el) return;
+  const branches = BRANCHES;
+  const colors = d.branch_colors || {};
+  const rows = branches
+    .map(b => ({ b, ...(d.branch_completion?.[b] || { started: 0, completed: 0, completion_pct: 0 }) }))
+    .filter(r => r.started > 0)
+    .sort((a, b) => b.completion_pct - a.completion_pct);
+  if (rows.length === 0) {
+    el.innerHTML = '<div class="empty-state">No branch data yet.</div>';
+    return;
+  }
+  el.innerHTML = rows.map(r => `
+    <div class="branch-perf-row">
+      <div class="branch-perf-name"><span class="dot" style="background:${colors[r.b] || '#999'};"></span>${BRANCH_LABEL[r.b] || r.b}</div>
+      <div class="branch-perf-bar"><div class="branch-perf-fill" style="width:${Math.min(100, r.completion_pct)}%;background:${colors[r.b] || '#999'};"></div></div>
+      <div class="branch-perf-counts">${fmt(r.completed)} / ${fmt(r.started)}</div>
+      <div class="branch-perf-pct">${r.completion_pct}%</div>
+    </div>
+  `).join('');
+}
+
+// ===== Hourly Traffic =====
+function renderHourly(d) {
+  const el = document.getElementById('hourlyChart');
+  const totalEl = document.getElementById('hourlyTotal');
+  if (!el) return;
+  const buckets = d.hourly || [];
+  if (buckets.length === 0) { el.innerHTML = '<div class="empty-state">No traffic data.</div>'; return; }
+  const max = Math.max(...buckets.map(b => b.started), 1);
+  const total24 = buckets.reduce((s, b) => s + b.started, 0);
+  if (totalEl) totalEl.textContent = fmt(total24) + ' starts · 24h';
+  const bars = buckets.map(b => {
+    const h = Math.max(2, (b.started / max) * 86);
+    const compPct = b.started > 0 ? Math.round((b.completed / b.started) * 100) : 0;
+    const cls = b.started > 0 ? (b.completed > 0 ? 'hourly-bar has-completion' : 'hourly-bar has-data') : 'hourly-bar';
+    const tip = `${new Date(b.hour_ts).toLocaleTimeString([], { hour: '2-digit' })} · ${b.started} started · ${b.completed} done`;
+    return `<div class="${cls}" style="height:${h}px;--comp-pct:${compPct}%;" data-tip="${tip}"></div>`;
+  }).join('');
+  // Axis labels: show first hour, midpoint hour, last hour
+  const labelHour = ts => new Date(ts).toLocaleTimeString([], { hour: 'numeric' });
+  el.innerHTML = `
+    <div class="hourly-bars">${bars}</div>
+    <div class="hourly-axis">
+      <span>${labelHour(buckets[0].hour_ts)}</span>
+      <span>${labelHour(buckets[Math.floor(buckets.length/2)].hour_ts)}</span>
+      <span>${labelHour(buckets[buckets.length-1].hour_ts)}</span>
+    </div>
+  `;
+}
+
+// ===== Devices =====
+function renderDevices(d) {
+  const el = document.getElementById('deviceSplit');
+  if (!el) return;
+  const entries = Object.entries(d.devices || {}).sort((a, b) => b[1] - a[1]);
+  if (entries.length === 0) { el.innerHTML = '<div class="empty-state">No data yet.</div>'; return; }
+  const sum = entries.reduce((s, [, n]) => s + n, 0) || 1;
+  el.innerHTML = entries.map(([k, n]) => {
+    const p = Math.round((n / sum) * 100);
+    return `<div class="device-row"><div class="lbl">${k}</div><div class="val">${fmt(n)}<span class="pct">${p}%</span></div></div>`;
+  }).join('');
+}
+
+// ===== Recent Activity Collapsible =====
+function toggleRecent() {
+  const el = document.querySelector('.recent-collapsible');
+  if (el) el.classList.toggle('open');
+}
+
+// ===== Session Detail Modal =====
+async function openSessionDetail(fullId) {
+  const overlay = document.getElementById('sessionModal');
+  const body = document.getElementById('sessionModalBody');
+  const title = document.getElementById('sessionModalTitle');
+  if (!overlay || !body) return;
+  overlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  body.innerHTML = '<div class="empty-state">Loading session…</div>';
+  title.textContent = 'Session ' + (fullId ? fullId.slice(0, 12) : '');
+  try {
+    const r = await fetch(STATS_URL + '?session=' + encodeURIComponent(fullId));
+    if (!r.ok) throw new Error('Could not load session');
+    const s = await r.json();
+    renderSessionDetail(s);
+  } catch (e) {
+    body.innerHTML = '<div class="empty-state">Could not load session.</div>';
+  }
+}
+function closeSessionDetail() {
+  document.getElementById('sessionModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+function renderSessionDetail(s) {
+  const body = document.getElementById('sessionModalBody');
+  const title = document.getElementById('sessionModalTitle');
+  const colors = currentData?.branch_colors || {};
+  const labels = s.screen_labels || {};
+  const branchColor = s.branch ? (colors[s.branch] || '#999') : 'var(--ink-3)';
+  title.innerHTML = `Session <span style="font-family:'SF Mono',Monaco,monospace;color:var(--ink-3);font-weight:500;">${s.id.slice(0,12)}</span>`;
+
+  const meta = [
+    ['Started',   new Date(s.started).toLocaleString()],
+    ['Status',    s.completed_at ? `Completed in ${secsToHuman(s.duration_seconds)}` : `In progress · ${secsToHuman(s.duration_seconds)} so far`],
+    ['Branch',    s.branch ? `<span style="color:${branchColor};font-weight:700;">${BRANCH_LABEL[s.branch] || s.branch}</span>` : 'Pre-Q1'],
+    ['Reached',   `Screen ${s.deepest_screen} of 10`],
+    ['Location',  `${s.city || '—'}, ${s.country || '—'}`],
+    ['Device',    s.device || '—'],
+    ['Referrer',  s.referrer || 'direct'],
+    ['User agent', s.ua || '—']
+  ];
+
+  // Build timeline from events
+  const events = (s.events || []).slice().sort((a, b) => a.ts - b.ts);
+  const startMs = s.started || (events[0] && events[0].ts) || 0;
+  const tlHtml = events.map(ev => {
+    const elapsed = startMs ? secsToHuman(Math.max(0, Math.round((ev.ts - startMs) / 1000))) : '';
+    let cls = '';
+    let what = '';
+    let detail = '';
+    if (ev.type === 'screen_view') {
+      cls = 'screen';
+      what = `Viewed ${labels[ev.screen] || ('Screen ' + ev.screen)}`;
+    } else if (ev.type === 'answer') {
+      cls = 'answer';
+      what = `Answered ${ev.k || ''}`;
+      detail = ev.v != null ? (Array.isArray(ev.v) ? ev.v.join(' · ') : String(ev.v)) : '';
+    } else if (ev.type === 'branch_set') {
+      cls = 'answer';
+      what = `Picked branch · ${ev.branch}`;
+    } else if (ev.type === 'complete') {
+      cls = 'complete';
+      what = 'Completed the quiz';
+    } else if (ev.type === 'abandon') {
+      what = 'Closed the tab';
+    } else {
+      what = ev.type;
+    }
+    return `
+      <div class="timeline-event ${cls}">
+        <span class="when">+${elapsed}</span>
+        <span class="what">${what}</span>
+        ${detail ? '<div class="detail">' + detail + '</div>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  // Build answers list
+  const ansHtml = Object.entries(s.answers || {})
+    .filter(([, v]) => v != null && v !== '')
+    .map(([k, v]) => `<div class="device-row"><div class="lbl">${k}</div><div class="val" style="font-weight:500;color:var(--ink-2);font-size:12.5px;">${Array.isArray(v) ? v.join(' · ') : v}</div></div>`)
+    .join('');
+
+  body.innerHTML = `
+    <div class="session-meta-grid">
+      ${meta.map(([l, v]) => `<div class="session-meta-item"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.04em;font-weight:700;margin:18px 0 10px;">Answers</div>
+    ${ansHtml ? '<div style="background:var(--bg);border-radius:10px;padding:8px 14px;">' + ansHtml + '</div>' : '<div class="empty-state" style="padding:12px;">No answers captured.</div>'}
+    <div style="font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.04em;font-weight:700;margin:18px 0 10px;">Journey timeline</div>
+    <div class="timeline">${tlHtml || '<div class="empty-state">No events recorded.</div>'}</div>
+  `;
+}
+
+async function tick() {
+  try {
+    const d = await fetchStats(currentRange);
+    render(d);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('footerMeta').textContent = 'Error loading data: ' + e.message;
+  }
+}
+
+// Range pills
+document.getElementById('rangePills').addEventListener('click', e => {
+  const b = e.target.closest('.range-pill');
+  if (!b) return;
+  document.querySelectorAll('.range-pill').forEach(p => p.classList.remove('active'));
+  b.classList.add('active');
+  currentRange = b.dataset.range;
+  try { localStorage.setItem('hb_range', currentRange); } catch(e) {}
+  tick();
+});
+
+// Refresh
+document.getElementById('btnRefresh').addEventListener('click', tick);
+
+// Download CSV
+document.getElementById('btnDownload').addEventListener('click', () => {
+  window.location.href = DOWNLOAD_URL + '?range=' + currentRange;
+});
+
+// Sync the active pill with the restored range (in case it isn't 24h)
+document.querySelectorAll('.range-pill').forEach(function(p) {
+  p.classList.toggle('active', p.dataset.range === currentRange);
+});
+
+// Start polling
+tick();
+pollTimer = setInterval(tick, 5000);
+
+// Pause polling when tab hidden, resume on focus
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  } else if (!pollTimer) {
+    tick();
+    pollTimer = setInterval(tick, 5000);
+  }
+});
+</script>
+
+</body>
+</html>
