@@ -1,0 +1,9 @@
+{
+  "name": "healthyblood-quiz-analytics",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@netlify/blobs": "^9.1.0"
+  }
+}
