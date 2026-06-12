@@ -50,17 +50,20 @@ function detectDevice(ua) {
 async function loadAllSessions() {
   const store = sessions();
   const listing = await store.list();
-  const blobs = listing?.blobs || [];
+  // Skip internal cache/lock blobs (keys starting with "_") — only real sessions.
+  const blobs = (listing?.blobs || []).filter(b => !String(b.key).startsWith('_'));
   const all = [];
-  for (let i = 0; i < blobs.length; i += 25) {
-    const batch = blobs.slice(i, i + 25);
+  // High concurrency so the load stays well under Netlify's ~10s timeout.
+  const CONCURRENCY = 150;
+  for (let i = 0; i < blobs.length; i += CONCURRENCY) {
+    const batch = blobs.slice(i, i + CONCURRENCY);
     const fetched = await Promise.all(batch.map(b => store.get(b.key, { type: 'json' }).catch(() => null)));
     fetched.forEach(s => { if (s) all.push(s); });
   }
   return all;
 }
 
-export default async (req) => {
+export default async (req, context) => {
   const pre = handlePreflight(req);
   if (pre) return pre;
 
@@ -96,7 +99,18 @@ export default async (req) => {
   const window = RANGE_MS[range] ?? RANGE_MS['24h'];
   const cutoff = window === Infinity ? 0 : (now() - window);
 
-  const all = await loadAllSessions();
+  // ---- Server-side cache + background refresh. The heavy "load every session"
+  // pass runs OFF the request path (context.waitUntil), so dashboards always get
+  // an instant cached response. Without this, 1.3k+ sessions × 5s polling 502'd. ----
+  const store0 = sessions();
+  const CACHE_KEY = '_aggcache_' + range;
+  const LOCK_KEY = '_agglock_' + range;
+  const FRESH_MS = 8000;
+  const LOCK_MS = 12000;
+  const cached = await store0.get(CACHE_KEY, { type: 'json' }).catch(() => null);
+
+  const computeAndCache = async () => {
+    const all = await loadAllSessions();
   const inRange = all.filter(s => (s.started || 0) >= cutoff);
 
   const out = {
@@ -432,5 +446,43 @@ export default async (req) => {
     br.click_through_pct = tot > 0 ? Math.round((br.clicks / tot) * 1000) / 10 : 0;
   });
 
-  return jsonResponse(out);
+    out._cache_at = now();
+    await store0.set(CACHE_KEY, JSON.stringify(out)).catch(() => {});
+    return out;
+  };
+
+  // Fresh cache → instant return.
+  if (cached && (now() - (cached._cache_at || 0)) < FRESH_MS) return jsonResponse(cached);
+
+  // Stale or missing → only one invocation recomputes at a time (lock).
+  const lock = await store0.get(LOCK_KEY, { type: 'json' }).catch(() => null);
+  const locked = lock && (now() - (lock.at || 0)) < LOCK_MS;
+
+  if (cached) {
+    // We have something to show — serve it instantly and refresh in the background.
+    if (!locked) {
+      await store0.set(LOCK_KEY, JSON.stringify({ at: now() })).catch(() => {});
+      const job = computeAndCache().catch(() => {});
+      if (context && typeof context.waitUntil === 'function') context.waitUntil(job);
+    }
+    return jsonResponse(cached);
+  }
+
+  // No cache at all (first request after deploy) — compute inline this once.
+  if (!locked) await store0.set(LOCK_KEY, JSON.stringify({ at: now() })).catch(() => {});
+  try {
+    const out = await computeAndCache();
+    return jsonResponse(out);
+  } catch (e) {
+    return jsonResponse({
+      range, generated_at: now(),
+      totals: { live: 0, started: 0, completed: 0, conversion_pct: 0, avg_completion_seconds: 0, median_completion_seconds: 0 },
+      funnel: {}, funnel_by_branch: {}, branch_completion: {}, branches: {}, countries: {}, cities: {},
+      referrers: {}, devices: {}, hourly: [], answers: {}, bottlenecks: [], durations: {}, duration_by_branch: {},
+      live_visitors: [], live_active_screens: {}, recent_sessions: [],
+      path_tree: { nodes: {}, edges: {}, live_on: {} },
+      cta_engagement: { by_branch: {}, by_cta: {}, by_close_method: { x: 0, no_thanks: 0 }, totals: { clicks: 0, closes: 0, click_through_pct: 0 } },
+      screen_labels: SCREEN_LABELS, branch_colors: {}, question_colors: {}
+    });
+  }
 };
