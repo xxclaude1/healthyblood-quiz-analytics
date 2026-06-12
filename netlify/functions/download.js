@@ -22,11 +22,14 @@ export default async (req) => {
 
   const store = sessions();
   const listing = await store.list();
-  const blobs = listing?.blobs || [];
+  // Skip internal cache/lock blobs (keys starting with "_"); high concurrency
+  // so the export doesn't time out at thousands of sessions.
+  const blobs = (listing?.blobs || []).filter(b => !String(b.key).startsWith('_'));
 
   const all = [];
-  for (let i = 0; i < blobs.length; i += 25) {
-    const batch = blobs.slice(i, i + 25);
+  const CONCURRENCY = 150;
+  for (let i = 0; i < blobs.length; i += CONCURRENCY) {
+    const batch = blobs.slice(i, i + CONCURRENCY);
     const fetched = await Promise.all(batch.map(b => store.get(b.key, { type: 'json' }).catch(() => null)));
     fetched.forEach(s => { if (s) all.push(s); });
   }
