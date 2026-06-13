@@ -1,6 +1,6 @@
 // CSV export of every session in scope.
 // GET /.netlify/functions/download?range=all
-import { sessions, handlePreflight, CORS, RANGE_MS, now } from './_common.js';
+import { sessions, handlePreflight, CORS, RANGE_MS, now, isQualityStored } from './_common.js';
 
 function csvEscape(v) {
   if (v == null) return '';
@@ -34,7 +34,7 @@ export default async (req) => {
     fetched.forEach(s => { if (s) all.push(s); });
   }
 
-  const filtered = all.filter(s => (s.started || 0) >= cutoff);
+  const filtered = all.filter(isQualityStored).filter(s => (s.started || 0) >= cutoff);
 
   const headers = [
     'session_id','started_iso','last_seen_iso','completed_iso','abandoned_iso',
