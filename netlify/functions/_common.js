@@ -53,6 +53,40 @@ export function now() {
   return Date.now();
 }
 
+// ===== Traffic quality filtering =====
+// Only count real human visitors from target countries. Everything else
+// (bots, crawlers, datacenter/Linux traffic, out-of-market countries) is
+// dropped at ingestion AND excluded from stats, so the dashboard reflects
+// only traffic worth measuring. Edit ALLOWED_COUNTRIES to change markets.
+export const ALLOWED_COUNTRIES = new Set(['US', 'CA', 'GB', 'AU', 'NZ']);
+
+// Real consumer platforms (matches shortenUA() output). Linux/Other = junk here.
+const QUALITY_PLATFORMS = new Set(['iPhone', 'iPad', 'Android', 'Macintosh', 'Windows']);
+
+export function isBotUA(ua) {
+  if (!ua) return true;
+  return /bot|crawl|spider|slurp|headless|phantom|puppeteer|playwright|python|curl|wget|libwww|http[-_]?client|java\/|go-http|okhttp|axios|node-fetch|facebookexternalhit|externalhit|preview|prerender|fetch|monitor|uptime|pingdom|statuscake|scan|ahrefs|semrush|mj12|dotbot|bingpreview|yandex|baidu|duckduckbot|googlebot|applebot|petalbot|gptbot|amazonbot/i.test(ua);
+}
+
+// Live check at ingestion — full user-agent string available.
+export function isQualityLive(country, fullUA) {
+  if (isBotUA(fullUA)) return false;
+  // Desktop Linux (not Android, which contains "Linux") → treat as bot/datacenter.
+  if (/Linux/i.test(fullUA || '') && !/Android/i.test(fullUA || '')) return false;
+  const platform = (String(fullUA || '').match(/iPhone|iPad|Android|Macintosh|Windows/) || [])[0];
+  if (!platform) return false; // unknown/Other UA
+  if (!country || !ALLOWED_COUNTRIES.has(String(country).toUpperCase())) return false;
+  return true;
+}
+
+// Stored-session check — ua is already shortened to a platform string.
+export function isQualityStored(s) {
+  if (!s) return false;
+  if (!QUALITY_PLATFORMS.has(s.ua)) return false;        // drops Linux / Other / null
+  if (!s.country || !ALLOWED_COUNTRIES.has(String(s.country).toUpperCase())) return false;
+  return true;
+}
+
 // Time range helpers (in ms)
 export const RANGE_MS = {
   '1h': 60 * 60 * 1000,
