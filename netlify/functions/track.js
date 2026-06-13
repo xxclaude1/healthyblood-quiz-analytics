@@ -1,6 +1,6 @@
 // Ingest a single quiz event (screen view, answer, branch set, complete, abandon).
 // Body: { session_id, type, screen?, branch?, answer_key?, answer_value?, referrer? }
-import { sessions, jsonResponse, handlePreflight, geoFromContext, shortenUA, shortenReferrer, now } from './_common.js';
+import { sessions, jsonResponse, handlePreflight, geoFromContext, shortenUA, shortenReferrer, now, isQualityLive } from './_common.js';
 
 // Healthy Blood cholesterol quiz screens are string IDs. Map to ordinal so the
 // numeric-keyed funnel + deepest_screen + screen_times stay backwards-compatible.
@@ -39,8 +39,12 @@ export default async (req, context) => {
   const ts = now();
   if (!s) {
     const geo = geoFromContext(context);
-    /* Capture every session regardless of country. The dashboard can still segment
-       by country, but no traffic should be silently dropped. */
+    const fullUA = req.headers.get('user-agent');
+    // Quality gate: never create a session for bots / non-target-country / junk
+    // traffic. Keeps the dashboard (and the blob store) clean and accurate.
+    if (!isQualityLive(geo.country, fullUA)) {
+      return jsonResponse({ ok: true, skipped: 'low_quality' });
+    }
     s = {
       id: session_id,
       started: ts,
