@@ -1,7 +1,7 @@
 // Aggregated analytics endpoint. Pull all sessions, compute everything the dashboard needs.
 // GET /.netlify/functions/stats?range=1h|6h|12h|24h|7d|30d|all
 // GET /.netlify/functions/stats?session=<id>          → full session detail (timeline + answers)
-import { sessions, jsonResponse, handlePreflight, RANGE_MS, now } from './_common.js';
+import { sessions, jsonResponse, handlePreflight, RANGE_MS, now, isQualityStored } from './_common.js';
 
 // ===== Healthy Blood cholesterol quiz screen map =====
 // The quiz uses string IDs (screen-2, screen-q1, ...). We map them to ordinals so the
@@ -110,7 +110,8 @@ export default async (req, context) => {
   const cached = await store0.get(CACHE_KEY, { type: 'json' }).catch(() => null);
 
   const computeAndCache = async () => {
-    const all = await loadAllSessions();
+    // Quality-only: bots / non-target-country / junk are excluded from every metric.
+    const all = (await loadAllSessions()).filter(isQualityStored);
   const inRange = all.filter(s => (s.started || 0) >= cutoff);
 
   const out = {
