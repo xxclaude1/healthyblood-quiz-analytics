@@ -719,8 +719,8 @@ function render(d) {
   const funnelEl = document.getElementById('funnel');
   funnelEl.innerHTML = '';
   const liveScreens = d.live_active_screens || {};
-  for (let i = 1; i <= 10; i++) {
-    if (i === 2) continue;   // branch split row (Q1 · Current Protocol) inserted below
+  for (let i = 1; i <= 12; i++) {
+    if (i === 4) continue;   // branch split row (Q1 · Current Protocol) inserted below
     const ct = d.funnel[i] || 0;
     const prev = i > 1 ? (d.funnel[i - 1] || 0) : ct;
     const drop = prev > 0 ? ((prev - ct) / prev) * 100 : 0;
@@ -740,19 +740,19 @@ function render(d) {
         <div class="funnel-drop ${dropClass}">${i > 1 ? '−' + (Math.round(drop * 10) / 10) + '%' : ''}</div>
       </div>
     `);
-    if (i === 1) {
-      // Insert branch-split row after Gender+Age, at Q1 · Current Protocol
-      const q1 = d.funnel[2] || 0;
-      const q1prev = d.funnel[1] || 1;
+    if (i === 3) {
+      // Insert branch-split row after the Intro screen, at Q1 · Current Protocol (screen 4)
+      const q1 = d.funnel[4] || 0;
+      const q1prev = d.funnel[3] || 1;
       const q1drop = q1prev > 0 ? ((q1prev - q1) / q1prev) * 100 : 0;
       const q1Class = q1drop > 30 ? 'alert' : (q1drop > 15 ? 'warn' : '');
       const q1w = total > 0 ? Math.max(2, (q1 / total) * 100) : 0;
-      const q1Color = (d.question_colors && d.question_colors[2]) ? d.question_colors[2] : 'var(--ink)';
-      const q1Live = (liveScreens[2] || 0) > 0 ? ' live-here' : '';
+      const q1Color = (d.question_colors && d.question_colors[4]) ? d.question_colors[4] : 'var(--ink)';
+      const q1Live = (liveScreens[4] || 0) > 0 ? ' live-here' : '';
       funnelEl.insertAdjacentHTML('beforeend', `
         <div class="funnel-row branch-split${q1Live}">
           <div>
-            <div class="funnel-label">${d.screen_labels[2] || 'Q1'}</div>
+            <div class="funnel-label">${d.screen_labels[4] || 'Q1'}</div>
             <div class="funnel-sub">Branch split point</div>
           </div>
           <div class="funnel-bar"><div class="funnel-bar-fill" style="width:${q1w}%;background:${q1Color};"></div></div>
@@ -946,7 +946,7 @@ function render(d) {
           <td>${clockTime(s.started)}<br><span style="font-size:11px;color:var(--ink-4);">${timeAgo(s.started)}</span></td>
           <td><span class="live-id">${s.id}</span></td>
           <td>${s.branch ? '<span class="pill" style="background:' + c + '20;color:' + c + ';"><span class="pill-dot" style="background:' + c + ';"></span> ' + BRANCH_LABEL[s.branch] + '</span>' : '<span class="pill pill-screen">Pre-Q1</span>'}</td>
-          <td>${s.deepest_screen} <span style="color:var(--ink-4);font-size:11px;">/ 10</span></td>
+          <td>${s.deepest_screen} <span style="color:var(--ink-4);font-size:11px;">/ 12</span></td>
           <td>${statusPill}</td>
           <td>${dur}</td>
           <td>${s.city}, ${s.country}</td>
@@ -1143,7 +1143,7 @@ function renderSessionDetail(s) {
     ['Started',   new Date(s.started).toLocaleString()],
     ['Status',    s.completed_at ? `Completed in ${secsToHuman(s.duration_seconds)}` : `In progress · ${secsToHuman(s.duration_seconds)} so far`],
     ['Branch',    s.branch ? `<span style="color:${branchColor};font-weight:700;">${BRANCH_LABEL[s.branch] || s.branch}</span>` : 'Pre-Q1'],
-    ['Reached',   `Screen ${s.deepest_screen} of 10`],
+    ['Reached',   `Screen ${s.deepest_screen} of 12`],
     ['Location',  `${s.city || '—'}, ${s.country || '—'}`],
     ['Device',    s.device || '—'],
     ['Referrer',  s.referrer || 'direct'],
