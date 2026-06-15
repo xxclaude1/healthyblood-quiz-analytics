@@ -7,27 +7,29 @@ import { sessions, jsonResponse, handlePreflight, RANGE_MS, now, isQualityStored
 // The quiz uses string IDs (screen-2, screen-q1, ...). We map them to ordinals so the
 // numeric-keyed funnel math works, AND we expose the string IDs for the path tree.
 const SCREEN_ORDER = [
-  'screen-2','screen-q1','screen-q2','screen-q3','screen-q4',
-  'screen-q5','screen-q6','screen-q7','screen-analysis','screen-results'
+  'screen-2','screen-age','screen-intro','screen-q1','screen-q2','screen-q3',
+  'screen-q4','screen-q5','screen-q6','screen-q7','screen-analysis','screen-results'
 ];
 const SCREEN_LABELS = {
-  1: 'Gender + Age',
-  2: 'Q1 · Current Protocol',
-  3: 'Q2 · Which Statin',
-  4: 'Q3 · Side Effects',
-  5: 'Q4 · LDL Number',
-  6: 'Q5 · Calcium Score',
-  7: 'Q6 · Biggest Worry',
-  8: 'Q7 · What Matters Most',
-  9: 'Analysis',
-  10: 'Results'
+  1: 'Gender',
+  2: 'Age',
+  3: 'Intro · Dr. Gundry',
+  4: 'Q1 · Current Protocol',
+  5: 'Q2 · Which Statin',
+  6: 'Q3 · Side Effects',
+  7: 'Q4 · LDL Number',
+  8: 'Q5 · Calcium Score',
+  9: 'Q6 · Biggest Worry',
+  10: 'Q7 · What Matters Most',
+  11: 'Analysis',
+  12: 'Results'
 };
 const TOTAL_SCREENS = SCREEN_ORDER.length;
 
 // "Branch" = current cholesterol protocol = Q1 answer. Four paths.
 const ALL_BRANCHES = ['statin','supplements','both','nothing'];
-// Q1 (current protocol) is at ordinal 2 — that's where the branch is known.
-const BRANCH_KNOWN_AT = 2;
+// Q1 (current protocol) is now at ordinal 4 (after Gender, Age, Intro).
+const BRANCH_KNOWN_AT = 4;
 
 function screenOrdinal(v) {
   if (typeof v === 'number' && !isNaN(v)) return v;
@@ -427,12 +429,11 @@ export default async (req, context) => {
     both: '#a855f7',         // statin + supplements — purple
     nothing: '#3b82f6'       // nothing yet — blue
   };
-  // Per-question color palette (used by dashboard for funnel bars) — 10 screens.
+  // Per-question color palette (used by dashboard for funnel bars) — 12 screens.
   out.question_colors = {
-    1: '#0a84ff', 2: '#ef4444', 3: '#f59e0b',
-    4: '#ec4899', 5: '#06b6d4', 6: '#10b981',
-    7: '#a855f7', 8: '#5856d6', 9: '#34c759',
-    10: '#0d2137'
+    1: '#0a84ff', 2: '#34c759', 3: '#5856d6', 4: '#ef4444',
+    5: '#f59e0b', 6: '#ec4899', 7: '#06b6d4', 8: '#10b981',
+    9: '#a855f7', 10: '#8b5cf6', 11: '#22c55e', 12: '#0d2137'
   };
 
   // CTA engagement percentages
