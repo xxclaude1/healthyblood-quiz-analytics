@@ -6,8 +6,8 @@ import { sessions, jsonResponse, handlePreflight, geoFromContext, shortenUA, sho
 // numeric-keyed funnel + deepest_screen + screen_times stay backwards-compatible.
 // (screen-q2 / screen-q3 are conditional — only statin users actually see them.)
 const SCREEN_ORDER = [
-  'screen-2','screen-q1','screen-q2','screen-q3','screen-q4',
-  'screen-q5','screen-q6','screen-q7','screen-analysis','screen-results'
+  'screen-2','screen-age','screen-intro','screen-q1','screen-q2','screen-q3',
+  'screen-q4','screen-q5','screen-q6','screen-q7','screen-analysis','screen-results'
 ];
 const TOTAL_SCREENS = SCREEN_ORDER.length;
 function screenOrdinal(v) {
